@@ -20,18 +20,18 @@ jobs:
 
       - name: Generate random quote
         run: |
-            node -e "
-            const fs = require('fs');
-            const quotes = JSON.parse(fs.readFileSync('quotes.json'));
-            const quote = quotes[Math.floor(Math.random() * quotes.length)];
-            const output = {
-                schemaVersion: 1,
-                label: '💭 THOUGHT OF THE DAY',
-                message: quote,
-                color: 'red'
-            };
-            fs.writeFileSync('random-quote.json', JSON.stringify(output));
-            "
+          node -e "
+          const fs = require('fs');
+          const quotes = JSON.parse(fs.readFileSync('quotes.json'));
+          const quote = quotes[Math.floor(Math.random() * quotes.length)];
+          const output = {
+              schemaVersion: 1,
+              label: '💭 THOUGHT OF THE DAY',
+              message: quote,
+              color: 'red'
+          };
+          fs.writeFileSync('random-quote.json', JSON.stringify(output));
+          "
 
       - name: Commit and push
         run: |
@@ -40,3 +40,15 @@ jobs:
           git add random-quote.json
           git commit -m "Sanctified rites completed. Praise be the Omnissiah!"
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
+
+      - name: Purge images from camo.githubusercontent.com
+        run: |
+          README_URL="https://raw.githubusercontent.com/${{ github.repository_owner }}/${{ github.repository_owner }}/main/README.md"
+
+          urls=$(curl -sL "$README_URL" \
+            | grep -Eo 'https://camo.githubusercontent.com[[:alnum:]/?=_%:.-]*' \
+            | sort -u)
+
+          while IFS= read -r url; do
+            curl -X PURGE "$url"
+          done <<< "$urls"
