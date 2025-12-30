@@ -1,0 +1,39 @@
+name: Update Thought of the Day
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-quote:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Generate random quote
+        run: |
+          quotes=$(cat quotes.json)
+          randomQuote=$(node -e "
+            const quotes = $quotes;
+            const quote = quotes[Math.floor(Math.random() * quotes.length)];
+            console.log(quote);
+          ")
+          echo "{ \"schemaVersion\": 1, \"label\": \"💭 THOUGHT OF THE DAY\", \"message\": \"$randomQuote\", \"color\": \"red\" }" > random-quote.json
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add random-quote.json
+          git commit -m "Sanctified rites completed. Praise be the Omnissiah!"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
