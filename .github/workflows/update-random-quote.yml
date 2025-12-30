@@ -45,10 +45,13 @@ jobs:
         run: |
           README_URL="https://raw.githubusercontent.com/${{ github.repository_owner }}/${{ github.repository_owner }}/main/README.md"
 
-          urls=$(curl -sL "$README_URL" \
-            | grep -Eo 'https://camo.githubusercontent.com[[:alnum:]/?=_%:.-]*' \
-            | sort -u)
-
-          while IFS= read -r url; do
-            curl -X PURGE "$url"
-          done <<< "$urls"
+          curl -sL "$README_URL" \
+            | tr -d '\r' \
+            | grep -Eo 'https://camo.githubusercontent.com[[:alnum:]/?=_%:.-]+' \
+            | sort -u \
+            | while IFS= read -r url; do
+                if [[ -n "$url" ]]; then
+                  echo "Purging $url"
+                  curl -X PURGE "$url"
+                fi
+              done
