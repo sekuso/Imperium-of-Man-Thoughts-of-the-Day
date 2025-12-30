@@ -2,7 +2,7 @@ name: Update Thought of the Day
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: `0 */6 * * *`
   workflow_dispatch:
 
 jobs:
@@ -22,13 +22,18 @@ jobs:
 
       - name: Generate random quote
         run: |
-          quotes=$(cat quotes.json)
-          randomQuote=$(node -e "
-            const quotes = $quotes;
+            node -e "
+            const fs = require('fs');
+            const quotes = JSON.parse(fs.readFileSync('quotes.json'));
             const quote = quotes[Math.floor(Math.random() * quotes.length)];
-            console.log(quote.replace(/\"/g, '\\"')); // escape quotes for JSON
-          ")
-          echo "{ \"schemaVersion\": 1, \"label\": \"💭 THOUGHT OF THE DAY\", \"message\": \"$randomQuote\", \"color\": \"red\" }" > random-quote.json
+            const output = {
+                schemaVersion: 1,
+                label: '💭 THOUGHT OF THE DAY',
+                message: quote,
+                color: 'red'
+            };
+            fs.writeFileSync('random-quote.json', JSON.stringify(output));
+            "
 
       - name: Commit and push
         run: |
