@@ -26,7 +26,7 @@ jobs:
           randomQuote=$(node -e "
             const quotes = $quotes;
             const quote = quotes[Math.floor(Math.random() * quotes.length)];
-            console.log(quote);
+            console.log(quote.replace(/\"/g, '\\"')); // escape quotes for JSON
           ")
           echo "{ \"schemaVersion\": 1, \"label\": \"💭 THOUGHT OF THE DAY\", \"message\": \"$randomQuote\", \"color\": \"red\" }" > random-quote.json
 
@@ -37,5 +37,3 @@ jobs:
           git add random-quote.json
           git commit -m "Sanctified rites completed. Praise be the Omnissiah!"
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
