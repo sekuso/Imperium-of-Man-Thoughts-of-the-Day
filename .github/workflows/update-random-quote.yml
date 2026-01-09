@@ -23,7 +23,22 @@ jobs:
           node -e "
           const fs = require('fs');
           const quotes = JSON.parse(fs.readFileSync('quotes.json'));
-          const quote = quotes[Math.floor(Math.random() * quotes.length)];
+          
+          let currentQuote = '';
+          if (fs.existsSync('random-quote.json')) {
+            const currentData = JSON.parse(fs.readFileSync('random-quote.json'));
+            currentQuote = currentData.message;
+          }
+          
+          let quote;
+          if (quotes.length === 1) {
+            quote = quotes[0];
+          } else {
+            do {
+              quote = quotes[Math.floor(Math.random() * quotes.length)];
+            } while (quote === currentQuote);
+          }
+      
           const output = {
               schemaVersion: 1,
               label: '💭 THOUGHT OF THE DAY',
